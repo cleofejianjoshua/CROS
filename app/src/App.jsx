@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { Test, Home, Book, FAQs, AdminLogin, AdminDashboard, NotFound } from "./pages"
+import { Test, Home, Book, FAQs, AdminLogin, AdminDashboard, NotFound } from "./pages/pages_index"
 import supabase from "./lib/supabase-client"
-import { Navbar }  from "./components"
+import { Navbar }  from "./components/components_index"
 
 function ProtectedRoute({ session, children }) {
   if (!session) return <Navigate to="/admin/login" replace />
