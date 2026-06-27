@@ -1,87 +1,51 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import './App.css'
+import { Test, Home, Book, FAQs, AdminLogin, AdminDashboard, NotFound } from "./pages"
 import supabase from "./supabase-client"
+import { Navbar }  from "./components"
 
-function App() {
-  const [friendList, setFriendList] = useState ([])
-  const [newFriend, setNewFriend] = useState ("")
-  const [newScore, setNewScore] = useState ("")
+function ProtectedRoute({ session, children }) {
+  if (!session) return <Navigate to="/admin/login" replace />
+  return children
+}
+
+export default function App() {
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchFriends();
-  }, []);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setLoading(false)
+    })
 
-  const fetchFriends = async () => {
-    const {data, error} = await supabase
-      .from("friends")
-      .select("*")
-    if (error) {
-      console.log("Error fetching ", error);
-    } else {
-      setFriendList(data);
-    }
-  }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
 
-  const addFriend = async () => {
-    const newFriendData = {
-      name: newFriend,
-      score: Number(newScore),
-    }
-    const {data, error} = await supabase
-      .from("friends")
-      .insert([newFriendData])
-      .select()
-      .single()
+    return () => subscription.unsubscribe()
+  }, [])
 
-    if (error){
-      console.log("Error adding todo: ", error);
-    } else {
-      setFriendList((prev) => [...prev, data]);
-      setNewFriend("")
-      setNewScore("")
-    }
-  }
+  if (loading) return null
 
   return (
-    <div>
-      {" "}
-      <h1>Friends Ranking</h1>
-      <div>
-        <input 
-          type="text" 
-          placeholder="Enter friend name"
-          value={newFriend}
-          onChange={(e) => setNewFriend(e.target.value)}
+    <BrowserRouter>
+      <Navbar session={session} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/book" element={<Book />} />
+        <Route path="/faqs" element={<FAQs />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute session={session}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
         />
-      </div>
-      <div>
-        <input 
-          type="number" 
-          placeholder="Enter score"
-          value={newScore}
-          onChange={(e) => setNewScore(e.target.value)}
-        />
-      </div>
-      <button onClick={addFriend}>Add to list</button>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Score</th>
-          </tr>
-        </thead> 
-        <tbody>
-          {[...friendList]
-            .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-            .map((friend) => (
-              <tr key={friend.id}>
-                <td>{friend.name}</td>
-                <td>{friend.score}</td>
-          </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
-export default App
