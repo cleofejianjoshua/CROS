@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import supabase from "../supabase-client"
+import supabase from "../lib/supabase-client"
 
 function Test() {
   const [friendList, setFriendList] = useState ([])

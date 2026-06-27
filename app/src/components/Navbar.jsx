@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import supabase from '../supabase-client'
+import supabase from '../lib/supabase-client'
 
 export default function Navbar({ session }) {
   const { pathname } = useLocation()

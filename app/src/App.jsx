@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Test, Home, Book, FAQs, AdminLogin, AdminDashboard, NotFound } from "./pages"
-import supabase from "./supabase-client"
+import supabase from "./lib/supabase-client"
 import { Navbar }  from "./components"
 
 function ProtectedRoute({ session, children }) {
